@@ -25,6 +25,13 @@ jobs:
     - name: 📥 Checkout repository
       uses: actions/checkout@v4
       
+    - name: 🔍 Debug - List files
+      run: |
+        echo "📁 Root directory contents:"
+        ls -la
+        echo "📦 Package files:"
+        ls -la package*.json pnpm-lock.yaml 2>/dev/null || echo "Some package files missing"
+      
     - name: 📦 Setup pnpm
       uses: pnpm/action-setup@v4
       with:
@@ -37,7 +44,15 @@ jobs:
         cache: 'pnpm'
         
     - name: 📥 Install dependencies
-      run: pnpm install --frozen-lockfile
+      run: |
+        # Verificar que existe pnpm-lock.yaml
+        if [ -f "pnpm-lock.yaml" ]; then
+          echo "✅ pnpm-lock.yaml found, installing with frozen lockfile"
+          pnpm install --frozen-lockfile
+        else
+          echo "⚠️ pnpm-lock.yaml not found, installing without frozen lockfile"
+          pnpm install
+        fi
       
     - name: 🔧 Build Astro site
       run: pnpm run build
