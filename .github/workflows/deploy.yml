@@ -55,17 +55,21 @@ jobs:
       run: ls -la dist/
       
     - name: 🔐 Setup SSH key
-      uses: webfactory/ssh-agent@v0.9.0
-      with:
-        ssh-private-key: ${{ secrets.CPANEL_SSH_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.CPANEL_SSH_KEY }}" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        eval $(ssh-agent -s)
+        ssh-add ~/.ssh/deploy_key
         
     - name: 📤 Deploy to cPanel via rsync
       run: |
         # Agregar host a known_hosts
         ssh-keyscan -H ${{ secrets.CPANEL_HOST }} >> ~/.ssh/known_hosts
         
-        # Sync files con rsync
+        # Sync files con rsync usando clave específica
         rsync -avz --delete \
+          -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
           --exclude='.htaccess' \
           --exclude='cgi-bin/' \
           --exclude='error_log' \
