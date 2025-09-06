@@ -1,0 +1,12 @@
+/* Global styles */
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 900px;
+  margin: 2rem auto;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}

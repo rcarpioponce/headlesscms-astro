@@ -1,0 +1,41 @@
+---
+import * as wp from '../../lib/wp';
+import '../../styles/global.css';
+import '../../styles/post.css';
+import { transformHtmlImages } from '../../utils/transformHtmlImages';
+import Layout from '../../layouts/Layout.astro';
+import HeroImage from '../../components/HeroImage.astro';
+
+export async function getStaticPaths() {
+  const posts = await wp.fetchPosts(20);
+  return posts.map((p) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const post = await wp.fetchPostBySlug(slug!);
+if (!post) return Astro.redirect('/404');
+
+const fm = wp.getFeatured(post._embedded?.['wp:featuredmedia']);
+const hero = wp.buildResponsiveFromWp(fm, {
+  maxWidth: 2048,
+  sizes: '(max-width: 768px) 100vw, 800px'
+});
+
+// Transformar el contenido para agregar lazy loading a las imágenes
+let transformedContent = '';
+if (post.content?.rendered) {
+  transformedContent = transformHtmlImages(post.content.rendered);
+}
+
+const title = post.title.rendered;
+---
+<Layout title={title}>
+  <div class="post-container">
+    <a href="/" class="back-link">← Volver</a>
+    <article>
+      <h1 set:html={post.title.rendered} />
+      {hero && <HeroImage hero={hero} priority={true} />}
+      <div set:html={transformedContent || post.content?.rendered} />
+    </article>
+  </div>
+</Layout>

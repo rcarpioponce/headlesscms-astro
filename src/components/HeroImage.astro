@@ -1,0 +1,35 @@
+---
+interface Props {
+  hero: {
+    src: string;
+    srcset: string;
+    webpSrcset: string;
+    sizes: string;
+    alt: string;
+    width: number;
+    height: number;
+  };
+  priority?: boolean;
+}
+
+const { hero, priority = false } = Astro.props;
+---
+
+<picture>
+  <source 
+    srcset={hero.webpSrcset} 
+    sizes={hero.sizes} 
+    type="image/webp" 
+  />
+  <img
+    src={hero.src}
+    srcset={hero.srcset}
+    sizes={hero.sizes}
+    alt={hero.alt}
+    width={hero.width}
+    height={hero.height}
+    class="hero-image"
+    loading={priority ? "eager" : "lazy"}
+    decoding="async"
+  />
+</picture>

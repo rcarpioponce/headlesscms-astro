@@ -1,0 +1,16 @@
+---
+import { fetchPosts, type WpPost } from '../lib/wp';
+import '../styles/global.css';
+import '../styles/index.css';
+import Layout from '../layouts/Layout.astro';
+import PostCard from '../components/PostCard.astro';
+
+const posts: WpPost[] = await fetchPosts(8); // asegúrate que fetchPosts usa _embed=1
+---
+<Layout title="Blog">
+<ul class="posts-list">
+  {posts.map((post) => (
+    <PostCard post={post} />
+  ))}
+</ul>
+</Layout>

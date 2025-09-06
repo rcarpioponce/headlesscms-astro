@@ -1,0 +1,38 @@
+---
+import { type WpPost, getFeatured, buildResponsiveFromWp } from '../lib/wp';
+
+interface Props {
+  post: WpPost;
+}
+
+const { post } = Astro.props;
+const fm = getFeatured(post._embedded?.['wp:featuredmedia']);
+const img = buildResponsiveFromWp(fm, {
+  maxWidth: 1200,
+  sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 420px'
+});
+---
+
+<li class="post-card">
+  <a href={`/blog/${post.slug}/`} class="post-link">
+    {img && (
+      <picture>
+        <source srcset={img.webpSrcset} sizes={img.sizes} type="image/webp" />
+        <img
+          src={img.src}
+          srcset={img.srcset}
+          sizes={img.sizes}
+          alt={img.alt}
+          loading="lazy"
+          decoding="async"
+          width={img.width}
+          height={img.height}
+        />
+      </picture>
+    )}
+    <div class="post-content">
+      <h2 class="post-title" set:html={post.title.rendered} />
+      <p class="post-excerpt" set:html={post.excerpt.rendered} />
+    </div>
+  </a>
+</li>
