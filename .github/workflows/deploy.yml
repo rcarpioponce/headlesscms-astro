@@ -64,12 +64,18 @@ jobs:
         
     - name: 📤 Deploy to cPanel via rsync
       run: |
-        # Agregar host a known_hosts
-        ssh-keyscan -H ${{ secrets.CPANEL_HOST }} >> ~/.ssh/known_hosts
+        # Agregar host a known_hosts con puerto específico
+        ssh-keyscan -p 53667 -H ${{ secrets.CPANEL_HOST }} >> ~/.ssh/known_hosts
         
-        # Sync files con rsync usando clave específica
+        # Test SSH connection first con puerto específico
+        echo "🔍 Testing SSH connection on port 53667..."
+        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 -p 53667 \
+          ${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }} "pwd && ls -la" || echo "SSH test failed"
+        
+        # Sync files con rsync usando puerto específico
+        echo "📤 Starting rsync with custom SSH port..."
         rsync -avz --delete \
-          -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+          -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p 53667 -v" \
           --exclude='.htaccess' \
           --exclude='cgi-bin/' \
           --exclude='error_log' \
