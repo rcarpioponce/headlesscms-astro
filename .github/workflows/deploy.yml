@@ -1,0 +1,73 @@
+name: Deploy to cPanel
+
+on:
+  # Trigger manual
+  workflow_dispatch:
+  
+  # Trigger por webhook desde WordPress
+  repository_dispatch:
+    types: [wordpress-post-published]
+  
+  # Trigger por push (opcional, para desarrollo)
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'astro.config.mjs'
+      - 'package.json'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: 📦 Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 8
+        
+    - name: 📥 Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: 🔧 Build Astro site
+      run: pnpm run build
+      env:
+        PUBLIC_CMS_URL: ${{ secrets.PUBLIC_CMS_URL }}
+        
+    - name: 🗂️ List dist directory (debug)
+      run: ls -la dist/
+      
+    - name: 🔐 Setup SSH key
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.CPANEL_SSH_KEY }}
+        
+    - name: 📤 Deploy to cPanel via rsync
+      run: |
+        # Agregar host a known_hosts
+        ssh-keyscan -H ${{ secrets.CPANEL_HOST }} >> ~/.ssh/known_hosts
+        
+        # Sync files con rsync
+        rsync -avz --delete \
+          --exclude='.htaccess' \
+          --exclude='cgi-bin/' \
+          --exclude='error_log' \
+          --exclude='wp-admin/' \
+          --exclude='wp-content/' \
+          --exclude='wp-includes/' \
+          dist/ ${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }}:${{ secrets.CPANEL_PATH }}
+          
+    - name: ✅ Deployment complete
+      run: |
+        echo "🚀 Deployment successful!"
+        echo "🌐 Site should be live at: https://${{ secrets.CPANEL_HOST }}"

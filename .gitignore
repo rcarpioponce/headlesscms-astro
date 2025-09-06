@@ -17,6 +17,12 @@ pnpm-debug.log*
 .env.local
 .env.production
 
+# deployment files (sensitive)
+deploy-config.json
+ssh-keys/
+*.pem
+*.key
+
 # macOS-specific files
 .DS_Store
 

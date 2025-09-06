@@ -6,7 +6,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "setup": "bash setup-deploy.sh",
+    "deploy:manual": "pnpm build && echo 'Build complete! Check GitHub Actions for deployment status'",
+    "deploy:trigger": "curl -X POST -H 'Accept: application/vnd.github.v3+json' -H 'Authorization: Bearer YOUR_TOKEN' https://api.github.com/repos/rcarpioponce/headlesscms-astro/dispatches -d '{\"event_type\":\"wordpress-post-published\"}'"
   },
   "dependencies": {
     "astro": "^5.13.5",
