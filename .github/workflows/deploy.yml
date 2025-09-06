@@ -35,7 +35,7 @@ jobs:
     - name: 📦 Setup pnpm
       uses: pnpm/action-setup@v4
       with:
-        version: 8
+        version: 10.14.0
         
     - name: 📦 Setup Node.js
       uses: actions/setup-node@v4
@@ -44,15 +44,7 @@ jobs:
         cache: 'pnpm'
         
     - name: 📥 Install dependencies
-      run: |
-        # Verificar que existe pnpm-lock.yaml
-        if [ -f "pnpm-lock.yaml" ]; then
-          echo "✅ pnpm-lock.yaml found, installing with frozen lockfile"
-          pnpm install --frozen-lockfile
-        else
-          echo "⚠️ pnpm-lock.yaml not found, installing without frozen lockfile"
-          pnpm install
-        fi
+      run: pnpm install --frozen-lockfile
       
     - name: 🔧 Build Astro site
       run: pnpm run build
