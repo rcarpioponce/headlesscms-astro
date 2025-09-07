@@ -1,0 +1,103 @@
+---
+import type { ReadingTimeResult } from '../utils/readingTime';
+
+export interface Props {
+  readingTime: ReadingTimeResult;
+  showWordCount?: boolean;
+  className?: string;
+}
+
+const { readingTime, showWordCount = false, className = '' } = Astro.props;
+---
+
+<div class={`reading-time ${className}`}>
+  <svg class="reading-time-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <polyline points="12,6 12,12 16,14"/>
+  </svg>
+  <span class="reading-time-text">
+    {readingTime.text}
+  </span>
+  {showWordCount && (
+    <span class="word-count">
+      • {readingTime.words.toLocaleString('es-ES')} palabras
+    </span>
+  )}
+</div>
+
+<style>
+.reading-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1;
+}
+
+.reading-time-icon {
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.reading-time-text {
+  font-weight: 500;
+}
+
+.word-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Variantes de estilo */
+.reading-time.large {
+  font-size: 1rem;
+}
+
+.reading-time.large .reading-time-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.reading-time.small {
+  font-size: 0.8rem;
+}
+
+.reading-time.small .reading-time-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* Estados hover para enlaces */
+.reading-time-link {
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.reading-time-link:hover {
+  color: var(--text-primary);
+}
+
+.reading-time-link:hover .reading-time-icon {
+  opacity: 1;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .reading-time {
+    font-size: 0.8rem;
+  }
+  
+  .reading-time-icon {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  
+  .word-count {
+    font-size: 0.75rem;
+  }
+}
+</style>

@@ -1,5 +1,7 @@
 ---
 import { type WpPost, getFeatured, buildResponsiveFromWp, getAuthor } from '../lib/wp';
+import { calculateReadingTime } from '../utils/readingTime';
+import ReadingTime from './ReadingTime.astro';
 
 interface Props {
   post: WpPost;
@@ -12,6 +14,10 @@ const img = buildResponsiveFromWp(fm, {
   maxWidth: 1200,
   sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 420px'
 });
+
+// Calcular tiempo de lectura usando excerpt + content si está disponible
+const contentForReading = post.content?.rendered || post.excerpt.rendered;
+const readingTime = calculateReadingTime(contentForReading);
 ---
 
 <li class="post-card">
@@ -41,6 +47,7 @@ const img = buildResponsiveFromWp(fm, {
             day: 'numeric' 
           })}
         </time>
+        <ReadingTime readingTime={readingTime} className="small" />
         {author && (
           <div class="post-author">
             Por <strong>{author.name}</strong>

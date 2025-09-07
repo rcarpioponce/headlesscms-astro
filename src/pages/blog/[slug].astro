@@ -6,6 +6,8 @@ import { transformHtmlImages } from '../../utils/transformHtmlImages';
 import Layout from '../../layouts/Layout.astro';
 import HeroImage from '../../components/HeroImage.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ReadingTime from '../../components/ReadingTime.astro';
+import { calculateReadingTime } from '../../utils/readingTime';
 
 export async function getStaticPaths() {
   // Usamos la función que obtiene todos los posts para generar todas las rutas
@@ -45,6 +47,11 @@ const metaDescription = post.excerpt.rendered
   .replace(/\s+/g, ' ') // Normalizar espacios
   .trim()
   .slice(0, 160); // Limitar a 160 caracteres
+
+// Calcular tiempo de lectura del contenido completo
+const readingTime = calculateReadingTime(
+  post.content?.rendered || post.excerpt.rendered
+);
 
 // URL de la imagen destacada para Open Graph
 const ogImage = fm?.source_url || '/favicon.svg';
@@ -117,6 +124,9 @@ const breadcrumbs = [
               • Por <strong>{author.name}</strong>
             </span>
           )}
+          <span class="post-reading-time">
+            • <ReadingTime readingTime={readingTime} />
+          </span>
         </div>
       </header>
       {hero && <HeroImage hero={hero} priority={true} />}
