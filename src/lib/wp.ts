@@ -55,23 +55,52 @@ export async function fetchPosts(perPage = 10, page = 1): Promise<WpPostsRespons
     _embed: 1 
   });
   
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`WP posts ${res.status}`);
-  
-  const posts: WpPost[] = await res.json();
-  
-  // WordPress envía información de paginación en los headers
-  const totalPosts = parseInt(res.headers.get('X-WP-Total') || '0');
-  const totalPages = parseInt(res.headers.get('X-WP-TotalPages') || '1');
-  
-  return {
-    posts,
-    totalPosts,
-    totalPages,
-    currentPage: page,
-    hasNextPage: page < totalPages,
-    hasPrevPage: page > 1
-  };
+  try {
+    const res = await fetch(url);
+    
+    if (res.status === 401) {
+      console.error('WordPress API REST está bloqueada. Verifica la configuración de seguridad.');
+      // Devolver datos mock para desarrollo
+      return {
+        posts: [],
+        totalPosts: 0,
+        totalPages: 1,
+        currentPage: page,
+        hasNextPage: false,
+        hasPrevPage: false
+      };
+    }
+    
+    if (!res.ok) {
+      throw new Error(`WP posts ${res.status}: ${res.statusText}`);
+    }
+    
+    const posts: WpPost[] = await res.json();
+    
+    // WordPress envía información de paginación en los headers
+    const totalPosts = parseInt(res.headers.get('X-WP-Total') || '0');
+    const totalPages = parseInt(res.headers.get('X-WP-TotalPages') || '1');
+    
+    return {
+      posts,
+      totalPosts,
+      totalPages,
+      currentPage: page,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1
+    };
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    // Devolver estructura vacía para evitar crashes
+    return {
+      posts: [],
+      totalPosts: 0,
+      totalPages: 1,
+      currentPage: page,
+      hasNextPage: false,
+      hasPrevPage: false
+    };
+  }
 }
 
 // Función legacy para compatibilidad
@@ -102,10 +131,25 @@ export async function fetchAllPosts(): Promise<WpPost[]> {
 
 export async function fetchPostBySlug(slug: string): Promise<WpPost | null> {
   const url = withParams(`${API_BASE}/posts`, { slug, _embed: 1 });
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`WP post ${res.status}`);
-  const arr: WpPost[] = await res.json();
-  return arr[0] ?? null;
+  
+  try {
+    const res = await fetch(url);
+    
+    if (res.status === 401) {
+      console.error('WordPress API REST está bloqueada para posts individuales.');
+      return null;
+    }
+    
+    if (!res.ok) {
+      throw new Error(`WP post ${res.status}: ${res.statusText}`);
+    }
+    
+    const arr: WpPost[] = await res.json();
+    return arr[0] ?? null;
+  } catch (error) {
+    console.error(`Error fetching post ${slug}:`, error);
+    return null;
+  }
 }
 
 export function getFeatured(fmArray?: WpFeatured[]) {

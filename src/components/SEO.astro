@@ -1,0 +1,86 @@
+---
+import { generateWebsiteSchema, generateArticleSchema, generateBreadcrumbSchema, type SchemaArticle, type SchemaBreadcrumb } from '../lib/schema';
+
+export interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  article?: SchemaArticle;
+  breadcrumbs?: SchemaBreadcrumb[];
+  noindex?: boolean;
+  keywords?: string;
+}
+
+const { 
+  title, 
+  description = "Blog de tecnología y aprendizaje diario. Descubre artículos sobre desarrollo web, programación y las últimas tendencias tecnológicas. Aprende cada día más con contenido de calidad.",
+  image = "/favicon.svg",
+  type = "website",
+  article,
+  breadcrumbs,
+  noindex = false,
+  keywords
+} = Astro.props;
+
+const siteUrl = Astro.site || "https://headlesscms.byteinnovalabs.xyz";
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
+const imageUrl = image.startsWith('http') ? image : new URL(image, siteUrl).toString();
+
+// Generar schemas
+const websiteSchema = generateWebsiteSchema();
+const articleSchema = article ? generateArticleSchema(article) : null;
+const breadcrumbSchema = breadcrumbs ? generateBreadcrumbSchema(breadcrumbs) : null;
+---
+
+<!-- SEO Meta Tags -->
+<title>{title}</title>
+<meta name="description" content={description} />
+{keywords && <meta name="keywords" content={keywords} />}
+<link rel="canonical" href={canonicalUrl} />
+
+<!-- Robots -->
+<meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:site_name" content="Aprende cada día más" />
+<meta property="og:locale" content="es_ES" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalUrl} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
+<meta name="twitter:creator" content="@renzo_carpio" />
+<meta name="twitter:site" content="@renzo_carpio" />
+
+<!-- Additional SEO -->
+<meta name="author" content="Renzo Carpio Ponce" />
+<meta name="language" content="es" />
+<meta name="theme-color" content="#667eea" />
+
+<!-- Preconnect to external domains -->
+<link rel="preconnect" href="https://cms.byteinnovalabs.xyz" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+
+<!-- Structured Data -->
+<script type="application/ld+json" set:html={websiteSchema}></script>
+{articleSchema && (
+  <script type="application/ld+json" set:html={articleSchema}></script>
+)}
+{breadcrumbSchema && (
+  <script type="application/ld+json" set:html={breadcrumbSchema}></script>
+)}

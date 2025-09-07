@@ -5,6 +5,7 @@ import '../../styles/post.css';
 import { transformHtmlImages } from '../../utils/transformHtmlImages';
 import Layout from '../../layouts/Layout.astro';
 import HeroImage from '../../components/HeroImage.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
 
 export async function getStaticPaths() {
   // Usamos la función que obtiene todos los posts para generar todas las rutas
@@ -47,14 +48,64 @@ const metaDescription = post.excerpt.rendered
 
 // URL de la imagen destacada para Open Graph
 const ogImage = fm?.source_url || '/favicon.svg';
+
+// Preparar datos para Schema.org
+const siteUrl = Astro.site || 'https://headlesscms.byteinnovalabs.xyz';
+const postUrl = new URL(`/blog/${post.slug}/`, siteUrl).toString();
+
+const articleSchema = {
+  headline: title,
+  description: metaDescription,
+  image: ogImage,
+  datePublished: post.date,
+  dateModified: post.date, // WordPress no siempre tiene modified date
+  author: {
+    name: author?.name || 'Autor desconocido',
+    url: author ? `${siteUrl}/author/${author.slug}` : undefined
+  },
+  publisher: {
+    name: 'Aprende cada día más',
+    logo: `${siteUrl}/favicon.svg`
+  },
+  url: postUrl
+};
+
+const breadcrumbs = [
+  { name: 'Inicio', url: siteUrl },
+  { name: 'Blog', url: `${siteUrl}/` },
+  { name: title, url: postUrl }
+].map(item => ({
+  ...item,
+  url: typeof item.url === 'string' ? item.url : item.url.toString()
+}));
 ---
 <Layout 
   title={`${title} | Aprende cada día más`}
   description={metaDescription}
   image={ogImage}
   type="article"
+  keywords={`tecnología, programación, desarrollo web, ${title.toLowerCase()}`}
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Article",
+      ...articleSchema
+    }, null, 2)}></script>
+    
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": breadcrumbs.map((crumb, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "name": crumb.name,
+        "item": crumb.url
+      }))
+    }, null, 2)}></script>
+  </Fragment>
   <div class="post-container">
+    <Breadcrumbs items={breadcrumbs} />
     <a href="/" class="back-link">← Volver</a>
     <article>
       <header class="post-header">
