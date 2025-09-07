@@ -7,13 +7,17 @@ import Layout from '../../layouts/Layout.astro';
 import HeroImage from '../../components/HeroImage.astro';
 
 export async function getStaticPaths() {
-  const posts = await wp.fetchPosts(20);
+  // Usamos la función que obtiene todos los posts para generar todas las rutas
+  const posts = await wp.fetchAllPosts();
   return posts.map((p) => ({ params: { slug: p.slug } }));
 }
 
 const { slug } = Astro.params;
 const post = await wp.fetchPostBySlug(slug!);
 if (!post) return Astro.redirect('/404');
+
+// Obtener información del autor
+const author = await wp.getPostAuthor(post);
 
 const fm = wp.getFeatured(post._embedded?.['wp:featuredmedia']);
 const hero = wp.buildResponsiveFromWp(fm, {
@@ -28,14 +32,29 @@ if (post.content?.rendered) {
 }
 
 const title = post.title.rendered;
+const formattedDate = new Date(post.date).toLocaleDateString('es-ES', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
 ---
 <Layout title={title}>
   <div class="post-container">
     <a href="/" class="back-link">← Volver</a>
     <article>
-      <h1 set:html={post.title.rendered} />
+      <header class="post-header">
+        <h1 set:html={post.title.rendered} />
+        <div class="post-meta">
+          <time datetime={post.date}>{formattedDate}</time>
+          {author && (
+            <span class="post-author">
+              • Por <strong>{author.name}</strong>
+            </span>
+          )}
+        </div>
+      </header>
       {hero && <HeroImage hero={hero} priority={true} />}
-      <div set:html={transformedContent || post.content?.rendered} />
+      <div class="post-content" set:html={transformedContent || post.content?.rendered} />
     </article>
   </div>
 </Layout>

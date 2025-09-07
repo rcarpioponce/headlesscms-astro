@@ -8,7 +8,7 @@ on:
   repository_dispatch:
     types: [wordpress-post-published]
   
-  # Trigger por push (opcional, para desarrollo)
+  # Trigger automático por push/merge a main
   push:
     branches: [ main ]
     paths:
@@ -16,12 +16,51 @@ on:
       - 'public/**'
       - 'astro.config.mjs'
       - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.env.example'
+  
+  # Trigger por Pull Request merge a main
+  pull_request:
+    branches: [ main ]
+    types: [closed]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Solo ejecutar si:
+    # 1. Es workflow_dispatch (manual)
+    # 2. Es repository_dispatch (WordPress webhook)
+    # 3. Es push a main
+    # 4. Es PR cerrado Y fue merged
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'repository_dispatch' ||
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     
     steps:
+    - name: 📋 Deployment Info
+      run: |
+        echo "🚀 Deployment triggered by: ${{ github.event_name }}"
+        case "${{ github.event_name }}" in
+          "workflow_dispatch")
+            echo "📝 Manual deployment triggered by: ${{ github.actor }}"
+            ;;
+          "repository_dispatch")
+            echo "📝 WordPress webhook triggered deployment"
+            echo "📰 Post: ${{ github.event.client_payload.post_title || 'Unknown' }}"
+            ;;
+          "push")
+            echo "📝 Code push to main branch"
+            echo "📋 Last commit: ${{ github.event.head_commit.message }}"
+            echo "👤 Author: ${{ github.event.head_commit.author.name }}"
+            ;;
+          "pull_request")
+            echo "📝 Pull Request merged to main"
+            echo "📋 PR: ${{ github.event.pull_request.title }}"
+            echo "👤 Author: ${{ github.event.pull_request.user.login }}"
+            ;;
+        esac
     - name: 📥 Checkout repository
       uses: actions/checkout@v4
       

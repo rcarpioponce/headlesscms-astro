@@ -1,12 +1,113 @@
 /* Global styles */
+:root {
+  /* Premium Dark Theme - Professional UX/UI */
+  --bg-primary: #0d1117;        /* GitHub-inspired deep dark */
+  --bg-secondary: #161b22;      /* Elevated surfaces */
+  --bg-card: #21262d;           /* Card background - more contrast */
+  --bg-elevated: #30363d;       /* Interactive states */
+  --bg-overlay: #1c2128;        /* Overlays and modals */
+  
+  /* Text with better contrast ratios */
+  --text-primary: #f0f6fc;      /* Pure white-blue (WCAG AAA) */
+  --text-secondary: #8b949e;    /* Balanced secondary (WCAG AA) */
+  --text-muted: #6e7681;        /* Readable muted text */
+  --text-placeholder: #484f58;  /* Form placeholders */
+  
+  /* Refined border system */
+  --border-default: #30363d;    /* Subtle but visible borders */
+  --border-muted: #21262d;      /* Very subtle borders */
+  --border-emphasis: #58a6ff;   /* Accent borders for focus */
+  --border-success: #3fb950;    /* Success state borders */
+  --border-danger: #f85149;     /* Error state borders */
+  
+  /* Modern accent palette */
+  --accent-primary: #58a6ff;    /* Bright blue - high visibility */
+  --accent-secondary: #a5a5ff;  /* Light purple */
+  --accent-tertiary: #39d353;   /* Success green */
+  --accent-warning: #d29922;    /* Amber warning */
+  --accent-danger: #f85149;     /* Error red */
+  
+  /* Sophisticated shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 3px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-elevated: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+html {
+  min-height: 100%;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
 body {
   font-family: system-ui, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+main {
+  flex: 1;
   max-width: 900px;
-  margin: 2rem auto;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 20px;
+  background-color: var(--bg-primary);
 }
 
 img {
   max-width: 100%;
   height: auto;
   display: block;
+  border-radius: 8px;
+}
+
+/* Premium scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--bg-secondary);
+}
+
+/* Refined selection styling */
+::selection {
+  background-color: var(--accent-primary);
+  color: var(--bg-primary);
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background-color: var(--accent-primary);
+  color: var(--bg-primary);
+  text-shadow: none;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  main {
+    padding: 0 20px;
+  }
 }

@@ -1,5 +1,5 @@
 ---
-import { type WpPost, getFeatured, buildResponsiveFromWp } from '../lib/wp';
+import { type WpPost, getFeatured, buildResponsiveFromWp, getAuthor } from '../lib/wp';
 
 interface Props {
   post: WpPost;
@@ -7,6 +7,7 @@ interface Props {
 
 const { post } = Astro.props;
 const fm = getFeatured(post._embedded?.['wp:featuredmedia']);
+const author = getAuthor(post._embedded?.author);
 const img = buildResponsiveFromWp(fm, {
   maxWidth: 1200,
   sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 420px'
@@ -32,7 +33,20 @@ const img = buildResponsiveFromWp(fm, {
     )}
     <div class="post-content">
       <h2 class="post-title" set:html={post.title.rendered} />
-      <p class="post-excerpt" set:html={post.excerpt.rendered} />
+      <div class="post-meta">
+        <time class="post-date" datetime={post.date}>
+          {new Date(post.date).toLocaleDateString('es-ES', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}
+        </time>
+        {author && (
+          <div class="post-author">
+            Por <strong>{author.name}</strong>
+          </div>
+        )}
+      </div>
     </div>
   </a>
 </li>

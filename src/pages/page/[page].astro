@@ -1,15 +1,41 @@
 ---
-import { fetchPosts, type WpPostsResponse } from '../lib/wp';
-import '../styles/global.css';
-import '../styles/index.css';
-import Layout from '../layouts/Layout.astro';
-import PostCard from '../components/PostCard.astro';
-import Pagination from '../components/Pagination.astro';
+import { fetchPosts, type WpPostsResponse } from '../../lib/wp';
+import '../../styles/global.css';
+import '../../styles/index.css';
+import Layout from '../../layouts/Layout.astro';
+import PostCard from '../../components/PostCard.astro';
+import Pagination from '../../components/Pagination.astro';
 
-const postsResponse: WpPostsResponse = await fetchPosts(6, 1);
+export async function getStaticPaths() {
+  // Primero obtenemos la primera página para saber cuántas páginas hay
+  const firstPageResponse = await fetchPosts(6, 1);
+  const totalPages = firstPageResponse.totalPages;
+  
+  // Generamos todas las páginas
+  const pages = [];
+  
+  for (let page = 1; page <= totalPages; page++) {
+    const response = await fetchPosts(6, page);
+    pages.push({
+      params: { page: page.toString() },
+      props: {
+        postsResponse: response
+      }
+    });
+  }
+  
+  return pages;
+}
+
+interface Props {
+  postsResponse: WpPostsResponse;
+}
+
+const { postsResponse } = Astro.props;
 const { posts, currentPage, totalPages, hasNextPage, hasPrevPage } = postsResponse;
 ---
-<Layout title="Blog">
+
+<Layout title={`Blog - Página ${currentPage}`}>
   <div class="blog-header">
     <h1>Blog</h1>
     <p class="blog-subtitle">Descubre las últimas noticias y artículos</p>

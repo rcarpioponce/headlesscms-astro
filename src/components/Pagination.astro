@@ -1,0 +1,221 @@
+---
+export interface Props {
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  baseUrl?: string;
+}
+
+const { currentPage, totalPages, hasNextPage, hasPrevPage, baseUrl = "/" } = Astro.props;
+
+function getPageUrl(pageNum: number) {
+  return pageNum === 1 ? baseUrl : `${baseUrl}page/${pageNum}/`;
+}
+
+// Generar array de páginas a mostrar
+function getPageNumbers(current: number, total: number) {
+  const pages: (number | 'ellipsis')[] = [];
+  
+  if (total <= 7) {
+    // Si hay 7 páginas o menos, mostrar todas
+    for (let i = 1; i <= total; i++) {
+      pages.push(i);
+    }
+  } else {
+    // Lógica más compleja para muchas páginas
+    pages.push(1);
+    
+    if (current <= 4) {
+      // Cerca del inicio
+      for (let i = 2; i <= 5; i++) {
+        pages.push(i);
+      }
+      pages.push('ellipsis');
+      pages.push(total);
+    } else if (current >= total - 3) {
+      // Cerca del final
+      pages.push('ellipsis');
+      for (let i = total - 4; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      // En el medio
+      pages.push('ellipsis');
+      for (let i = current - 1; i <= current + 1; i++) {
+        pages.push(i);
+      }
+      pages.push('ellipsis');
+      pages.push(total);
+    }
+  }
+  
+  return pages;
+}
+
+const pageNumbers = getPageNumbers(currentPage, totalPages);
+---
+
+<nav class="pagination" aria-label="Paginación de posts">
+  <div class="pagination-info">
+    <span>Página {currentPage} de {totalPages}</span>
+  </div>
+  
+  <div class="pagination-controls">
+    {hasPrevPage && (
+      <a href={getPageUrl(currentPage - 1)} class="pagination-link pagination-prev" aria-label="Página anterior">
+        ← Anterior
+      </a>
+    )}
+    
+    <div class="pagination-numbers">
+      {pageNumbers.map((page) => (
+        page === 'ellipsis' ? (
+          <span class="pagination-ellipsis">...</span>
+        ) : (
+          <a 
+            href={getPageUrl(page)} 
+            class={`pagination-link pagination-number ${page === currentPage ? 'current' : ''}`}
+            aria-label={page === currentPage ? `Página actual ${page}` : `Ir a página ${page}`}
+            aria-current={page === currentPage ? 'page' : undefined}
+          >
+            {page}
+          </a>
+        )
+      ))}
+    </div>
+    
+    {hasNextPage && (
+      <a href={getPageUrl(currentPage + 1)} class="pagination-link pagination-next" aria-label="Página siguiente">
+        Siguiente →
+      </a>
+    )}
+  </div>
+</nav>
+
+<style>
+.pagination {
+  margin: 3rem 0 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pagination-info {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination-numbers {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.pagination-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.pagination-link:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-elevated);
+  border-color: var(--border-emphasis);
+  transform: translateY(-1px);
+}
+
+.pagination-link:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.pagination-link.current {
+  color: var(--text-primary);
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  cursor: default;
+}
+
+.pagination-link.current:hover {
+  transform: none;
+}
+
+.pagination-prev,
+.pagination-next {
+  font-weight: 500;
+  padding: 0 16px;
+}
+
+.pagination-ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .pagination-controls {
+    gap: 0.25rem;
+  }
+  
+  .pagination-link {
+    min-width: 36px;
+    height: 36px;
+    font-size: 0.85rem;
+  }
+  
+  .pagination-prev,
+  .pagination-next {
+    padding: 0 12px;
+    font-size: 0.8rem;
+  }
+  
+  .pagination-ellipsis {
+    min-width: 36px;
+    height: 36px;
+  }
+}
+
+/* Very small screens - hide some page numbers */
+@media (max-width: 480px) {
+  .pagination-numbers {
+    gap: 0.125rem;
+  }
+  
+  .pagination-link {
+    min-width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+  
+  .pagination-prev,
+  .pagination-next {
+    padding: 0 8px;
+  }
+}
+</style>
