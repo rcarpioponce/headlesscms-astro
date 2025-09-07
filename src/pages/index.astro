@@ -9,7 +9,10 @@ import Pagination from '../components/Pagination.astro';
 const postsResponse: WpPostsResponse = await fetchPosts(6, 1);
 const { posts, currentPage, totalPages, hasNextPage, hasPrevPage } = postsResponse;
 ---
-<Layout title="Blog">
+<Layout 
+  title="Blog - Aprende cada día más" 
+  description="Descubre las últimas noticias y artículos sobre tecnología, desarrollo web y programación. Blog de contenido de calidad para aprender cada día más."
+>
   <div class="blog-header">
     <h1>Blog</h1>
     <p class="blog-subtitle">Descubre las últimas noticias y artículos</p>

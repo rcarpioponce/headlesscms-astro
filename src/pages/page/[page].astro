@@ -35,7 +35,10 @@ const { postsResponse } = Astro.props;
 const { posts, currentPage, totalPages, hasNextPage, hasPrevPage } = postsResponse;
 ---
 
-<Layout title={`Blog - Página ${currentPage}`}>
+<Layout 
+  title={`Blog - Página ${currentPage} | Aprende cada día más`}
+  description={`Explora más artículos sobre tecnología y desarrollo web. Página ${currentPage} de ${totalPages} con contenido de calidad para seguir aprendiendo.`}
+>
   <div class="blog-header">
     <h1>Blog</h1>
     <p class="blog-subtitle">Descubre las últimas noticias y artículos</p>

@@ -4,16 +4,52 @@ import Footer from '../components/Footer.astro';
 
 interface Props {
   title: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
 }
 
-const { title } = Astro.props;
+const { 
+  title, 
+  description = "Blog de tecnología y aprendizaje diario. Descubre artículos sobre desarrollo web, programación y las últimas tendencias tecnológicas. Aprende cada día más con contenido de calidad.",
+  image = "/favicon.svg",
+  type = "website"
+} = Astro.props;
+
+const siteUrl = Astro.site || "https://byteinnova-astro.vercel.app";
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
 ---
 <!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <!-- SEO Meta Tags -->
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+    <meta property="og:site_name" content="Aprende cada día más" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalUrl} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={image} />
+    
+    <!-- Additional SEO -->
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Renzo Carpio Ponce" />
+    <meta name="language" content="es" />
+    
     <slot name="head" />
   </head>
   <body>
